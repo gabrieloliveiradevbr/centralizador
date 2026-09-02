@@ -88,4 +88,3 @@ O **Centralizador de Dados** é uma aplicação desenvolvida em Laravel para vis
 ## 🛡️ Segurança
 
 **Importante:** Este sistema possui capacidades de alteração de dados (`UPDATE` e `DELETE`). Certifique-se de que ele esteja hospedado em ambiente seguro e com acesso restrito a administradores autorizados.
-2
