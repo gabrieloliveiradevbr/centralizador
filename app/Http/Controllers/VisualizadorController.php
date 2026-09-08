@@ -120,7 +120,7 @@ class VisualizadorController extends Controller
                 eventDescription: $eventDesc
             );
 
-            return view('dashboard', array_merge(
+            return view('index', array_merge(
                 ['dashboard' => $dashboardData],
                 $dashboardData->toArray() // Mantém compatibilidade com variáveis soltas na View
             ));
