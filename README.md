@@ -11,12 +11,17 @@ O **Centralizador de Dados** é uma aplicação desenvolvida em Laravel para vis
     - Navegação categorizada por fases (Tabelas, Não Periódicos, SST, etc.).
     - Banner informativo com contexto técnico para cada evento do eSocial.
 - **Linha do Tempo do Trabalhador**: Consolida todos os eventos de um trabalhador (vinculados por CPF/Matrícula) em uma timeline cronológica, integrando dados de múltiplas tabelas e a tabela de histórico de envios.
+- **Gestão de Certificados Digitais**: 
+    - Upload e controle de arquivos A1 (.pfx / .p12).
+    - Suporte a Titularidade da Entidade ou Procuração Eletrônica (CPF/CNPJ do procurador).
+    - Download seguro de certificados armazenados.
+    - Exclusão de registros e arquivos físicos.
 - **Multi-Banco**: Suporte a múltiplas conexões simultâneas (ex: Câmaras de Anapu, Carnaubal e Jucás).
 - **Interface Moderna**: Suporte a Dark Mode e design responsivo utilizando Tailwind CSS e Alpine.js.
 
 ## 🛠️ Stack Tecnológica
 
-- **Backend**: [Laravel 11+](https://laravel.com) (PHP 8.2+)
+- **Backend**: [Laravel 11+](https://laravel.com) (PHP 8.5+)
 - **Banco de Dados**: [PostgreSQL](https://www.postgresql.org/)
 - **Frontend**: [Tailwind CSS](https://tailwindcss.com) & [Alpine.js](https://alpinejs.dev)
 - **Ícones**: [Remix Icon](https://remixicon.com)
@@ -84,7 +89,8 @@ O **Centralizador de Dados** é uma aplicação desenvolvida em Laravel para vis
 4. Utilize a busca global ou os filtros por coluna para localizar registros específicos.
 5. Para editar um dado, clique no ícone de lápis (apenas em tabelas com PK).
 6. Para ver a linha do tempo de um trabalhador, abra os detalhes do registro e clique em **"Ver Linha do Tempo"**.
+7. Para gerir os certificados digitais, utilize o menu **"Certificado Digital"** na barra lateral.
 
 ## 🛡️ Segurança
 
-**Importante:** Este sistema possui capacidades de alteração de dados (`UPDATE` e `DELETE`). Certifique-se de que ele esteja hospedado em ambiente seguro e com acesso restrito a administradores autorizados.
+**Importante:** Este sistema possui capacidades de alteração de dados (`UPDATE` e `DELETE`). Certifique-se de que uma camada de autenticação seja implementada e que o sistema esteja hospedado em ambiente seguro com acesso restrito a administradores autorizados.
