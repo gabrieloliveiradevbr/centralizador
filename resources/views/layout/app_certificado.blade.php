@@ -95,7 +95,6 @@
         @include('components.sidebar')
 
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            @include('components.header')
 
             <main class="flex-1 overflow-y-auto p-6 space-y-6" :class="{ 'p-3 space-y-3': telaCheia }">
                 @yield('content')

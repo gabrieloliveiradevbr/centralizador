@@ -19,20 +19,20 @@ class VisualizadorController extends Controller
     private function getBancosDisponiveis(): array
     {
         return [
-            'pgsql_anapu' => 'Câmara de Anapu',
-            'pgsql_carnaubal' => 'Câmara de Carnaubal',
-            'pgsql_jucas' => 'Câmara de Jucás',
+            'cm_anapu' => 'Câmara de Anapu',
+            'cm_carnaubal' => 'Câmara de Carnaubal',
+            'cm_jucas' => 'Câmara de Jucás',
         ];
     }
 
-    public function index(Request $request, TableQueryService $tableQueryService, $banco = 'pgsql_jucas', $schema = 'esocial', $tabela = null)
+    public function index(Request $request, TableQueryService $tableQueryService, $banco = 'cm_jucas', $schema = 'esocial', $tabela = null)
     {
         try {
             $bancosDisponiveis = $this->getBancosDisponiveis();
 
             // Segurança do Banco
             if (!array_key_exists($banco, $bancosDisponiveis) || !config("database.connections.{$banco}")) {
-                $banco = 'pgsql_jucas';
+                $banco = 'cm_jucas';
             }
 
             // Sanitização rigorosa

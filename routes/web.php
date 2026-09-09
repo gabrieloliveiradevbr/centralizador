@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VisualizadorController;
+use App\Http\Controllers\CertificadoController;
 
 // Redireciona a raiz para o visualizador
 Route::redirect('/', '/visualizar');
@@ -17,4 +18,13 @@ Route::put('/visualizar/{banco?}/{schema?}/{tabela?}', [VisualizadorController::
 
 // Rota para histórico do trabalhador
 Route::get('/{banco}/trabalhador/{identificador}/historico', [VisualizadorController::class, 'historicoTrabalhador'])->name('trabalhador.historico');
+
+// Rotas para certificados
+Route::get('/{banco}/certificados', [CertificadoController::class, 'index'])->name('certificados.index');
+
+Route::post('/{banco}/certificados/upload', [CertificadoController::class, 'upload'])->name('certificados.upload');
+
+Route::get('/{banco}/certificados/download', [CertificadoController::class, 'download'])->name('certificados.download');
+
+Route::delete('/{banco}/certificados/destroy', [CertificadoController::class, 'destroy'])->name('certificados.destroy');
 

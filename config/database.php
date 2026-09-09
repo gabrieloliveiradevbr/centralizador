@@ -11,7 +11,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'default' => env('DB_CONNECTION', 'pgsql_jucas'),
+    'default' => env('DB_CONNECTION', 'cm_jucas'),
 
     /*
     |--------------------------------------------------------------------------
@@ -21,11 +21,12 @@ return [
 
     'connections' => [
 
-        'pgsql_jucas' => [
+        'cm_jucas' => [
             'driver' => 'pgsql',
             'host' => '127.0.0.1',
             'port' => 5432,
-            'database' => 'ifolhawebdbcmjucas_desktop_2026-08-28-0100', // Nome do BD de Jucás
+            'database' => 'ifolhawebdbcmjucas_desktop_2026-08-28-0100',
+            'entidade' => '04.293.769/0001-04',
             'username' => 'postgres',
             'password' => '123',
             'charset' => 'utf8',
@@ -34,11 +35,12 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'pgsql_anapu' => [
+        'cm_anapu' => [
             'driver' => 'pgsql',
             'host' => '127.0.0.1',
             'port' => 5432,
-            'database' => 'ifolhawebdbcmanapu_desktop_2026-08-28-0100', // Nome real do BD de Anapu
+            'database' => 'ifolhawebdbcmanapu_desktop_2026-08-28-0100',
+            'entidade' => '01.681.776/0001-87',
             'username' => 'postgres',
             'password' => '123',
             'charset' => 'utf8',
@@ -47,11 +49,12 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'pgsql_carnaubal' => [
+        'cm_carnaubal' => [
             'driver' => 'pgsql',
             'host' => '127.0.0.1',
             'port' => 5432,
-            'database' => 'ifolhawebdbcmcarnaubal_desktop_2026-08-28-0100', // Nome real do BD de Carnaubal
+            'database' => 'ifolhawebdbcmcarnaubal_desktop_2026-08-28-0100',
+            'entidade' => '06.577.167/0001-04',
             'username' => 'postgres',
             'password' => '123',
             'charset' => 'utf8',

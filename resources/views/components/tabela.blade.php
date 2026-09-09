@@ -61,62 +61,143 @@
         </div>
     </div>
 
-    <!-- Tabela de Dados -->
-    <div class="overflow-x-auto flex-1">
-        <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wider border-b border-gray-200 dark:border-gray-700 select-none sticky top-0 bg-white dark:bg-gray-800 z-10">
+    <!-- Painel de Filtros Avançados -->
+    <div x-show="painelFiltrosOpen" x-cloak
+         class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-800 shadow-2xl z-50 border-l border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 transform">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50">
+            <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <i class="ri-filter-3-line text-brand-500"></i> Filtros Avançados
+            </h3>
+            <button @click="painelFiltrosOpen = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="ri-close-line text-xl"></i>
+            </button>
+        </div>
+        <form action="{{ route('visualizar', ['banco' => $banco, 'schema' => $schema, 'tabela' => $tabela]) }}" method="GET" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <input type="hidden" name="search" value="{{ $termoBusca ?? '' }}">
+            <input type="hidden" name="sort" value="{{ $sortColuna ?? '' }}">
+            <input type="hidden" name="direction" value="{{ $direction ?? 'asc' }}">
+            <input type="hidden" name="duplicate_column" value="{{ $colunaDuplicada ?? '' }}">
+
+            @foreach ($colunas as $coluna)
+                <div class="space-y-1">
+                    <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $coluna }}</label>
+                    <input type="text" name="filters[{{ $coluna }}]" value="{{ $filtrosColuna[$coluna] ?? '' }}"
+                           placeholder="Filtrar..."
+                           class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+            @endforeach
+
+            <div class="pt-4 flex gap-2">
+                <button type="submit" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white py-2 px-4 rounded-lg text-sm font-bold transition">
+                    Aplicar
+                </button>
+                <a href="{{ route('visualizar', ['banco' => $banco, 'schema' => $schema, 'tabela' => $tabela]) }}"
+                   class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
+                    Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Painel de Detecção de Duplicados -->
+    <div x-show="painelDuplicadosOpen" x-cloak
+         class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-800 shadow-2xl z-50 border-l border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 transform">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50">
+            <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <i class="ri-file-copy-line text-amber-500"></i> Detectar Duplicados
+            </h3>
+            <button @click="painelDuplicadosOpen = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <i class="ri-close-line text-xl"></i>
+            </button>
+        </div>
+        <form action="{{ route('visualizar', ['banco' => $banco, 'schema' => $schema, 'tabela' => $tabela]) }}" method="GET" class="p-6 space-y-6">
+            <input type="hidden" name="search" value="{{ $termoBusca ?? '' }}">
+            <input type="hidden" name="sort" value="{{ $sortColuna ?? '' }}">
+            <input type="hidden" name="direction" value="{{ $direction ?? 'asc' }}">
+            @foreach ($filtrosColuna ?? [] as $col => $val)
+                <input type="hidden" name="filters[{{ $col }}]" value="{{ $val }}">
+            @endforeach
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Selecione a coluna para verificar duplicados:</label>
+                <select name="duplicate_column" class="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+                    <option value="">-- Selecione --</option>
+                    @foreach ($colunas as $coluna)
+                        <option value="{{ $coluna }}" {{ $colunaDuplicada === $coluna ? 'selected' : '' }}>{{ $coluna }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="pt-4 flex gap-2">
+                <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2 px-4 rounded-lg text-sm font-bold transition">
+                    Detectar
+                </button>
+                <a href="{{ route('visualizar', ['banco' => $banco, 'schema' => $schema, 'tabela' => $tabela]) }}"
+                   class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
+                    Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabela de Dados Refatorada -->
+    <div class="overflow-x-auto flex-1 relative border-t border-gray-200 dark:border-gray-700">
+        <table class="w-full text-left text-xs border-collapse">
+            <thead class="sticky top-0 z-20 bg-gray-100/90 dark:bg-gray-800/95 backdrop-blur-sm text-gray-600 dark:text-gray-300 uppercase tracking-wider text-[11px] border-b border-gray-200 dark:border-gray-700 select-none shadow-sm">
                 <tr>
-                    <th class="px-4 py-3 font-semibold text-center w-28">Ações</th>
+                    <th class="sticky left-0 z-30 bg-gray-100 dark:bg-gray-800 px-3 py-2.5 font-bold text-center w-24 border-r border-gray-200 dark:border-gray-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                        Ações
+                    </th>
                     @foreach ($colunas as $coluna)
                         @php
                             $isSorted = ($sortColuna ?? '') === $coluna;
                             $nextDirection = $isSorted && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
                         @endphp
-                        <th class="px-6 py-3 font-semibold whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
+                        <th class="px-4 py-2.5 font-semibold whitespace-nowrap hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition cursor-pointer">
                             <a href="{{ route('visualizar', array_merge(request()->query(), ['banco' => $banco, 'schema' => $schema, 'tabela' => $tabela, 'sort' => $coluna, 'direction' => $nextDirection])) }}"
-                                class="flex items-center gap-1.5 w-full h-full">
-                                <span>{{ $coluna }}</span>
-                                <i class="{{ $isSorted ? (($direction ?? 'asc') === 'asc' ? 'ri-arrow-up-line text-brand-500 font-bold' : 'ri-arrow-down-line text-brand-500 font-bold') : 'ri-arrow-up-down-line text-gray-400 opacity-40 hover:opacity-100' }}"></i>
+                                class="flex items-center gap-1.5 w-full h-full group">
+                                <span class="{{ $isSorted ? 'text-brand-600 dark:text-brand-400 font-bold' : '' }}">{{ $coluna }}</span>
+                                <i class="{{ $isSorted ? (($direction ?? 'asc') === 'asc' ? 'ri-arrow-up-line text-brand-600 dark:text-brand-400 font-bold' : 'ri-arrow-down-line text-brand-600 dark:text-brand-400 font-bold') : 'ri-arrow-up-down-line text-gray-400 opacity-0 group-hover:opacity-100 transition' }}"></i>
                             </a>
                         </th>
                     @endforeach
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 font-mono">
                 @forelse($dados as $linha)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                        <td class="px-4 py-4 text-center whitespace-nowrap">
-                            <div class="flex items-center justify-center gap-1">
-                                <button @click="registroSelecionado = {{ json_encode($linha) }}" title="Ver Detalhes"
-                                    class="p-1.5 text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/40 rounded-lg transition">
-                                    <i class="ri-eye-line text-base"></i>
+                    <tr class="hover:bg-brand-50/40 dark:hover:bg-brand-950/20 even:bg-gray-50/40 dark:even:bg-gray-800/30 transition-colors group">
+                        <td class="sticky left-0 z-10 bg-white group-even:bg-gray-50/90 group-hover:bg-brand-50/90 dark:bg-gray-800 dark:group-even:bg-gray-800/90 dark:group-hover:bg-gray-800 px-2 py-2 text-center whitespace-nowrap border-r border-gray-200 dark:border-gray-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                            <div class="flex items-center justify-center gap-0.5">
+                                <button @click="registroSelecionado = {{ json_encode($linha) }}" title="Visualizar"
+                                    class="p-1 text-gray-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/40 rounded transition">
+                                    <i class="ri-eye-line text-sm"></i>
                                 </button>
-                                <button @click="registroParaEditar = JSON.parse(JSON.stringify({{ json_encode($linha) }}))" title="Editar Registro"
+                                <button @click="registroParaEditar = JSON.parse(JSON.stringify({{ json_encode($linha) }}))" title="Editar"
                                     :disabled="{{ is_null($dashboard->primaryKey) ? 'true' : 'false' }}"
-                                    :class="{ 'opacity-40 cursor-not-allowed': {{ is_null($dashboard->primaryKey) ? 'true' : 'false' }} }"
-                                    class="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/40 rounded-lg transition">
-                                    <i class="ri-pencil-line text-base"></i>
+                                    :class="{ 'opacity-30 cursor-not-allowed': {{ is_null($dashboard->primaryKey) ? 'true' : 'false' }} }"
+                                    class="p-1 text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/40 rounded transition">
+                                    <i class="ri-pencil-line text-sm"></i>
                                 </button>
-                                <button @click="registroParaDeletar = {{ json_encode($linha) }}" title="Excluir Registro"
+                                <button @click="registroParaDeletar = {{ json_encode($linha) }}" title="Excluir"
                                     :disabled="{{ is_null($dashboard->primaryKey) ? 'true' : 'false' }}"
-                                    :class="{ 'opacity-40 cursor-not-allowed': {{ is_null($dashboard->primaryKey) ? 'true' : 'false' }} }"
-                                    class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-lg transition">
-                                    <i class="ri-delete-bin-line text-base"></i>
+                                    :class="{ 'opacity-30 cursor-not-allowed': {{ is_null($dashboard->primaryKey) ? 'true' : 'false' }} }"
+                                    class="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/40 rounded transition">
+                                    <i class="ri-delete-bin-line text-sm"></i>
                                 </button>
                             </div>
                         </td>
                         @foreach ((array) $linha as $chaveCol => $valor)
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300 max-w-xs truncate">
+                            <td class="px-4 py-2 whitespace-nowrap text-gray-800 dark:text-gray-200 text-xs max-w-xs truncate selection:bg-brand-200">
                                 @if (is_null($valor))
-                                    <span class="text-xs text-gray-400 italic">null</span>
+                                    <span class="inline-block px-1.5 py-0.2 text-[10px] font-sans font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">null</span>
                                 @elseif(is_bool($valor))
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $valor ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300' }}">
-                                        {{ $valor ? 'Verdadeiro' : 'Falso' }}
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-semibold {{ $valor ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800' }}">
+                                        {{ $valor ? 'TRUE' : 'FALSE' }}
                                     </span>
                                 @elseif(is_array($valor) || is_object($valor))
-                                    <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded">{{ json_encode($valor) }}</span>
+                                    <span class="text-[11px] bg-gray-100 dark:bg-gray-900 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">{{ json_encode($valor) }}</span>
                                 @else
-                                    {{ $valor }}
+                                    <span title="{{ $valor }}">{{ $valor }}</span>
                                 @endif
                             </td>
                         @endforeach
@@ -124,7 +205,7 @@
                 @empty
                     <tr>
                         <td colspan="{{ count($colunas) > 0 ? count($colunas) + 1 : 1 }}" class="px-6 py-12 text-center text-gray-400">
-                            <i class="ri-inbox-line text-4xl block mb-2"></i>
+                            <i class="ri-inbox-line text-3xl block mb-1"></i>
                             Nenhum registro encontrado nesta tabela.
                         </td>
                     </tr>
