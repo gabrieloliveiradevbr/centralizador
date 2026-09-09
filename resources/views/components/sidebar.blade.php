@@ -32,7 +32,7 @@
                 </span>
 
                 <span class="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
-                    eSocial • v1.0
+                    eSocial • v2.0
                 </span>
             </div>
         </div>
