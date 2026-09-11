@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 
 class CertificadoController extends Controller
@@ -41,7 +39,7 @@ class CertificadoController extends Controller
             Log::error("Erro ao consultar certificados no banco {$banco}: " . $e->getMessage());
         }
 
-        // Mapeia arquivos físicos no storage para evitar dependência de finfo
+        // Mapeia arquivos físicos no storage
         $arquivosStorage = [];
         $dir = storage_path("app/certificados/{$banco}");
         if (is_dir($dir)) {
@@ -58,13 +56,13 @@ class CertificadoController extends Controller
             'bancosDisponiveis' => $bancosDisponiveis,
             'cnpjEntidade'      => $cnpjEntidade,
             'certificados'      => $certificados,
-            'arquivosStorage'    => $arquivosStorage,
+            'arquivosStorage'   => $arquivosStorage,
             'darkMode'          => $request->cookie('dark_mode') === '1',
         ]);
     }
 
     /**
-     * Realiza o upload do certificado digital (Titular ou Procurador)
+     * Realiza o upload garantindo Apenas 1 Certificado ativo por entidade
      */
     public function upload(Request $request, string $banco = 'cm_jucas')
     {
@@ -79,75 +77,91 @@ class CertificadoController extends Controller
             'certificado'  => 'required|file|max:2048',
             'senha'        => 'nullable|string',
         ], [
-            'tipo_titular.in' => 'Selecione um tipo de titular válido.',
+            'tipo_titular.in'       => 'Selecione um tipo de titular válido.',
             'documento.required_if' => 'O documento do procurador é obrigatório.',
-            'documento.string' => 'O documento deve ser um texto válido.',
-            'certificado.required' => 'O arquivo do certificado é obrigatório.',
-            'certificado.max' => 'O arquivo não pode exceder 2MB.',
-            'senha.string' => 'A senha deve ser um texto válido.',
+            'documento.string'      => 'O documento deve ser um texto válido.',
+            'certificado.required'  => 'O arquivo do certificado é obrigatório.',
+            'certificado.max'       => 'O arquivo não pode exceder 2MB.',
+            'senha.string'          => 'A senha deve ser um texto válido.',
         ]);
 
-        // Validação manual de extensão para evitar crash de php_fileinfo
+        // Validação manual de extensão
         $file = $request->file('certificado');
         $extension = strtolower($file->getClientOriginalExtension());
         if (!in_array($extension, ['pfx', 'p12'])) {
             return redirect()->back()->with('error', 'O arquivo deve ser do tipo .pfx ou .p12.');
         }
 
-        // Define documento base
-        if ($request->tipo_titular === 'entidade') {
-            $documento = config("database.connections.{$banco}.entidade");
-        } else {
-            $documento = $request->input('documento');
+        // 1. CNPJ sempre é o CNPJ da Entidade
+        $cnpjEntidade = config("database.connections.{$banco}.entidade");
+        $cnpjSanitizado = preg_replace('/[^0-9]/', '', $cnpjEntidade ?? '');
+
+        if (strlen($cnpjSanitizado) !== 14) {
+            return redirect()->back()->with('error', 'CNPJ da entidade não está configurado corretamente em config/database.php.');
         }
 
-        $docSanitizado = preg_replace('/[^0-9]/', '', $documento ?? '');
-        $len = strlen($docSanitizado);
+        // 2. Lógica de Procurador vs Entidade para tpinsc / nrinsc
+        $nrInsc = null;
+        $tpInsc = null;
 
-        if ($len !== 11 && $len !== 14) {
-            return redirect()->back()->with('error', 'O documento deve conter 11 (CPF) ou 14 (CNPJ) dígitos.');
+        if ($request->tipo_titular === 'procuracao') {
+            $docProcurador = preg_replace('/[^0-9]/', '', $request->input('documento', ''));
+
+            if (strlen($docProcurador) === 14) {
+                $nrInsc = $docProcurador;
+                $tpInsc = 1; // 1 = CNPJ no eSocial
+            } elseif (strlen($docProcurador) === 11) {
+                $nrInsc = $docProcurador;
+                $tpInsc = 2; // 2 = CPF no eSocial
+            } else {
+                return redirect()->back()->with('error', 'O documento do procurador deve ter 11 (CPF) ou 14 (CNPJ) dígitos.');
+            }
         }
 
         try {
+            $db = DB::connection($banco);
             $dir = storage_path("app/certificados/{$banco}");
-            if (!is_dir($dir)) {
-                if (!mkdir($dir, 0755, true)) {
-                    throw new \Exception("Não foi possível criar o diretório de armazenamento.");
+
+            // =========================================================================
+            // REGRA: Apenas 1 certificado por entidade. Limpa anteriores (Disco e DB)
+            // =========================================================================
+            if (is_dir($dir)) {
+                $arquivos = glob("{$dir}/*.*");
+                foreach ($arquivos as $arquivo) {
+                    if (file_exists($arquivo)) {
+                        unlink($arquivo);
+                    }
                 }
+            } else {
+                mkdir($dir, 0755, true);
             }
 
-            $fileName = "{$docSanitizado}_" . time() . ".pfx";
+            // Exclui registros anteriores no banco
+            $db->table('esocial.certificados')->delete();
+
+            // Salva o novo arquivo nomeado padronizado com o CNPJ da entidade
+            $fileName = "{$cnpjSanitizado}_" . time() . ".pfx";
             if (!$file->move($dir, $fileName)) {
                 throw new \Exception("Falha ao mover o arquivo para o servidor.");
             }
 
-            $senha = $request->filled('senha')
-                ? $request->input('senha')
-                : null;
+            // Senha salva em texto puro (sem criptografia)
+            $senhaPura = $request->filled('senha') ? $request->input('senha') : null;
 
-
-            $db = DB::connection($banco);
-            $exists = $db->table('esocial.certificados')->where('cnpj', $docSanitizado)->exists();
-
-            if ($exists) {
-                $db->table('esocial.certificados')->where('cnpj', $docSanitizado)->update([
-                    'senha'        => $senha,
-                    'alterado_por' => 1,
-                    'alterado_em'  => now(),
-                ]);
-            } else {
-                $db->table('esocial.certificados')->insert([
-                    'cnpj'         => $docSanitizado,
-                    'senha'        => $senha,
-                    'criado_por'   => 1,
-                    'criado_em'    => now(),
-                    'alterado_por' => 1,
-                    'alterado_em'  => now(),
-                ]);
-            }
+            // Insere o novo registro único
+            $db->table('esocial.certificados')->insert([
+                'cnpj'         => $cnpjSanitizado,
+                'tpinsc'       => $tpInsc,
+                'nrinsc'       => $nrInsc,
+                'senha'        => $senhaPura,
+                'criado_por'   => 1,
+                'criado_em'    => now(),
+                'alterado_por' => 1,
+                'alterado_em'  => now(),
+            ]);
 
             return redirect()->route('certificados.index', ['banco' => $banco])
-                ->with('success', 'Certificado digital salvo com sucesso!');
+                ->with('success', 'Certificado digital atualizado com sucesso!');
         } catch (\Throwable $e) {
             Log::error("Erro no upload do certificado ({$banco}): " . $e->getMessage());
             return redirect()->back()->with('error', 'Erro ao processar upload: ' . $e->getMessage());
@@ -155,7 +169,7 @@ class CertificadoController extends Controller
     }
 
     /**
-     * Faz download do certificado via documento
+     * Faz download do certificado via documento da entidade
      */
     public function download(Request $request, string $banco = 'cm_jucas')
     {
@@ -176,17 +190,15 @@ class CertificadoController extends Controller
                 ->with('error', 'Diretório de certificados não encontrado.');
         }
 
-        // Busca arquivo que comece com o documento
         $files = glob("{$dir}/{$doc}_*.pfx");
         if (empty($files)) {
             return redirect()->route('certificados.index', ['banco' => $banco])
-                ->with('error', 'Arquivo do certificado não encontrado para este documento.');
+                ->with('error', 'Arquivo do certificado não encontrado no servidor.');
         }
 
-        // Retorna o arquivo mais recente
         usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
 
-        return response()->download($files[0], "certificado_{$doc}.pfx", [
+        return response()->download($files[0], "certificate.pfx", [
             'Content-Type' => 'application/x-pkcs12',
         ]);
     }
@@ -218,7 +230,9 @@ class CertificadoController extends Controller
             if (is_dir($dir)) {
                 $files = glob("{$dir}/{$doc}_*.pfx");
                 foreach ($files as $file) {
-                    unlink($file);
+                    if (file_exists($file)) {
+                        unlink($file);
+                    }
                 }
             }
 
