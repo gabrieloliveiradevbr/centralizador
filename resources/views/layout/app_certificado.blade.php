@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR" x-data="{
-    darkMode: {{ $darkMode ? 'true' : 'false' }},
+    darkMode: {{ ($darkMode ?? request()->cookie('dark_mode') === '1') ? 'true' : 'false' }},
     sidebarOpen: true,
     registroSelecionado: null,
     registroParaEditar: null,

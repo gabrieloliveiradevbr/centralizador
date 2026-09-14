@@ -29,33 +29,36 @@
                 @endif
             </form>
 
-            <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex items-center gap-1.5 xl:gap-2 flex-shrink-0">
                 <button @click="painelDuplicadosOpen = !painelDuplicadosOpen; painelFiltrosOpen = false"
-                    class="px-3 py-2 text-sm font-medium rounded-lg border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 flex items-center gap-2 transition"
+                    title="Detectar Duplicados"
+                    class="px-2.5 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 flex items-center gap-1.5 transition"
                     :class="{ 'bg-amber-500 text-white dark:bg-amber-600 dark:text-white': painelDuplicadosOpen || {{ !empty($colunaDuplicada) ? 'true' : 'false' }} }">
                     <i class="ri-file-copy-line text-amber-500" :class="{ 'text-white': painelDuplicadosOpen || {{ !empty($colunaDuplicada) ? 'true' : 'false' }} }"></i>
-                    <span>Detectar Duplicados</span>
+                    <span class="hidden xl:inline">Detectar Duplicados</span>
                     @if (!empty($colunaDuplicada))
-                        <span class="bg-amber-700 text-white text-xs px-2 py-0.5 rounded-full font-bold">Ativo</span>
+                        <span class="bg-amber-700 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">Ativo</span>
                     @endif
                 </button>
 
                 <button @click="painelFiltrosOpen = !painelFiltrosOpen; painelDuplicadosOpen = false"
-                    class="px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition"
+                    title="Filtros"
+                    class="px-2.5 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-1.5 transition"
                     :class="{ 'bg-brand-500 text-white dark:bg-brand-600 dark:text-white': painelFiltrosOpen }">
                     <i class="ri-filter-3-line text-brand-500" :class="{ 'text-white': painelFiltrosOpen }"></i>
-                    <span>Filtros</span>
+                    <span class="hidden xl:inline">Filtros</span>
                     @if (!empty($filtrosColuna))
-                        <span class="bg-brand-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                        <span class="bg-brand-600 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
                             {{ count($filtrosColuna) }}
                         </span>
                     @endif
                 </button>
 
                 <button @click="telaCheia = !telaCheia"
-                    class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-700 transition flex items-center gap-1 text-sm font-medium">
-                    <i :class="telaCheia ? 'ri-fullscreen-exit-line text-brand-500' : 'ri-fullscreen-line'" class="text-lg"></i>
-                    <span x-text="telaCheia ? 'Sair' : 'Expandir'" class="hidden md:inline"></span>
+                    title="Expandir / Reduzir"
+                    class="px-2.5 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1.5 transition">
+                    <i :class="telaCheia ? 'ri-fullscreen-exit-line text-brand-500' : 'ri-fullscreen-line'" class="text-base"></i>
+                    <span x-text="telaCheia ? 'Sair' : 'Expandir'" class="hidden xl:inline"></span>
                 </button>
             </div>
         </div>

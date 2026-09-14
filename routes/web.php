@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VisualizadorController;
 use App\Http\Controllers\CertificadoController;
+use App\Http\Controllers\XmlController;
 
 // Redireciona a raiz para o visualizador
 Route::redirect('/', '/visualizar');
@@ -27,4 +28,10 @@ Route::post('/{banco}/certificados/upload', [CertificadoController::class, 'uplo
 Route::get('/{banco}/certificados/download', [CertificadoController::class, 'download'])->name('certificados.download');
 
 Route::delete('/{banco}/certificados/destroy', [CertificadoController::class, 'destroy'])->name('certificados.destroy');
+
+// Rotas de XML do eSocial
+Route::get('/{banco}/xml/export/{tabela}/{id}', [XmlController::class, 'export'])->name('xml.export');
+
+Route::get('/{banco}/xml/import', [XmlController::class, 'importView'])->name('xml.import.view');
+Route::post('/{banco}/xml/import', [XmlController::class, 'import'])->name('xml.import');
 

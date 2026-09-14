@@ -22,11 +22,19 @@
 
     <div class="flex items-center gap-3">
         <!-- Alternar entre Visualizador de Tabelas e Certificados -->
-        <a href="{{ request()->routeIs('certificados.*') ? route('visualizar', ['banco' => $banco]) : route('certificados.index', ['banco' => $banco]) }}"
-           class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition {{ request()->routeIs('certificados.*') ? 'bg-brand-50 border-brand-200 text-brand-700 dark:bg-brand-950/40 dark:border-brand-800 dark:text-brand-300 hover:bg-brand-100' : 'bg-amber-50/70 border-amber-200/80 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800/50 dark:text-amber-300 hover:bg-amber-100/80' }}">
-            <i class="{{ request()->routeIs('certificados.*') ? 'ri-table-line text-brand-500' : 'ri-shield-keyhole-line text-amber-500' }} text-sm"></i>
-            <span>{{ request()->routeIs('certificados.*') ? 'Ver Tabelas' : 'Certificado Digital' }}</span>
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="{{ request()->routeIs('certificados.*') ? route('visualizar', ['banco' => $banco]) : route('certificados.index', ['banco' => $banco]) }}"
+               class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition {{ request()->routeIs('certificados.*') ? 'bg-brand-50 border-brand-200 text-brand-700 dark:bg-brand-950/40 dark:border-brand-800 dark:text-brand-300 hover:bg-brand-100' : 'bg-amber-50/70 border-amber-200/80 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800/50 dark:text-amber-300 hover:bg-amber-100/80' }}">
+                <i class="{{ request()->routeIs('certificados.*') ? 'ri-table-line text-brand-500' : 'ri-shield-keyhole-line text-amber-500' }} text-sm"></i>
+                <span>{{ request()->routeIs('certificados.*') ? 'Ver Tabelas' : 'Certificado Digital' }}</span>
+            </a>
+
+            <a href="{{ route('xml.import.view', ['banco' => $banco]) }}"
+               class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-brand-600 bg-brand-500 hover:bg-brand-600 text-white transition shadow-sm">
+                <i class="ri-upload-cloud-2-line text-sm"></i>
+                <span>Importar XML</span>
+            </a>
+        </div>
 
         <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1">
             <i class="ri-server-line text-gray-400 text-xs"></i>
