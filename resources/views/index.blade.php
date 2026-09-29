@@ -2,18 +2,27 @@
 
 @section('content')
     @if ($dashboard->eventTitle)
-        <div class="bg-gradient-to-r from-brand-100/60 via-brand-50/20 to-white dark:from-brand-900/30 dark:via-brand-950/20 dark:to-gray-900/80 border border-brand-300/60 dark:border-brand-700/40 p-4 rounded-xl flex items-start gap-3.5 shadow-sm dark:shadow-brand-950/20">
-            <div class="w-9 h-9 bg-brand-500 text-white rounded-lg flex items-center justify-center shrink-0 shadow-sm shadow-brand-500/20">
-                <i class="ri-information-line text-lg"></i>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl px-5 py-4 flex items-start justify-between gap-4 transition">
+            <div class="space-y-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        {{ strtoupper($tabela) }}
+                    </span>
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                        {{ $dashboard->eventTitle }}
+                    </h3>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-4xl">
+                    {{ $dashboard->eventDescription }}
+                </p>
             </div>
-            <div class="space-y-0.5">
-                <h4 class="text-sm font-bold text-gray-900 dark:text-white tracking-tight">{{ $dashboard->eventTitle }}</h4>
-                <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{{ $dashboard->eventDescription }}</p>
+            <div class="hidden sm:flex items-center text-slate-400 dark:text-slate-500 shrink-0">
+                <i class="ri-information-line text-lg"></i>
             </div>
         </div>
     @endif
 
-    <!-- Cards KPI -->
+    <!-- Cards KPI Minimalistas -->
     @include('components.kpis')
 
     <!-- Tabela Principal com Busca e Filtros -->

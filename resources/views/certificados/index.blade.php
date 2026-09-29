@@ -1,7 +1,7 @@
 @extends('layout.app_certificado')
 
 @section('content')
-<div class="max-w-5xl mx-auto space-y-6" x-data="{ tipoTitular: 'entidade', modalDeletarDoc: null }">
+<div class="max-w-5xl mx-auto space-y-6" x-data="{ tipoTitular: 'entidade', modalDeletarDoc: null, activeTab: 'ativos' }">
 
     @if ($errors->any())
         <div class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-4 rounded-xl text-xs space-y-1 shadow-sm">
@@ -23,8 +23,8 @@
         </div>
     @endif
 
-    <!-- Cabeçalho & Seletor de Banco -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+    <!-- Cabeçalho & Contexto Global -->
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-4">
             <a href="{{ route('visualizar', ['banco' => $banco]) }}"
                class="p-2 text-gray-500 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition"
@@ -33,6 +33,176 @@
             </a>
             <div>
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i class="ri-shield-keyhole-line text-brand-500"></i> Gestão de Certificado Digital
+                </h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Certificados A1 para assinatura do eSocial (Entidade Própria ou Procuração Eletrônica).
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
+            <i class="ri-server-line text-gray-400 ml-1"></i>
+            <select onchange="location = this.value;"
+                class="bg-transparent border-none text-gray-800 dark:text-gray-200 text-sm rounded-lg p-1 focus:ring-0 outline-none cursor-pointer">
+                @foreach ($bancosDisponiveis as $key => $nome)
+                    <option value="{{ route('certificados.index', ['banco' => $key]) }}"
+                        {{ $banco === $key ? 'selected' : '' }}>
+                        {{ $nome }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <!-- Navegação por Abas -->
+    <div class="flex p-1 bg-gray-200/50 dark:bg-gray-700/50 rounded-xl w-fit mx-auto">
+        <button @click="activeTab = 'ativos'"
+                :class="activeTab === 'ativos' ? 'bg-white dark:bg-gray-800 shadow-sm text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                class="px-6 py-2 text-sm font-bold rounded-lg transition-all flex items-center gap-2">
+            <i class="ri-checkbox-circle-line"></i> Certificados Ativos
+        </button>
+        <button @click="activeTab = 'enviar'"
+                :class="activeTab === 'enviar' ? 'bg-white dark:bg-gray-800 shadow-sm text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                class="px-6 py-2 text-sm font-bold rounded-lg transition-all flex items-center gap-2">
+            <i class="ri-upload-cloud-line"></i> Enviar Novo
+        </button>
+    </div>
+
+    <div class="space-y-6">
+        <!-- Tab: Certificados Ativos -->
+        <div x-show="activeTab === 'ativos'" x-cloak class="space-y-4">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="ri-information-line text-brand-500"></i> Certificados Cadastrados
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+                    @forelse ($certificados as $cert)
+                        @php
+                            $docSanitizado = preg_replace('/[^0-9]/', '', $cert->cnpj);
+                            $arquivoExiste = collect($arquivosStorage)->contains(fn($p) => str_contains($p, $docSanitizado));
+                            $isEntidade = $docSanitizado === preg_replace('/[^0-9]/', '', $cnpjEntidade);
+                        @endphp
+
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 space-y-3 hover:border-brand-300 dark:hover:border-brand-700 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase font-sans {{ $isEntidade ? 'bg-brand-100 text-brand-800 dark:bg-brand-900/40 dark:text-brand-300' : 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300' }}">
+                                    {{ $isEntidade ? 'Titular Entidade' : 'Procurador' }}
+                                </span>
+                                <span class="text-gray-400 font-normal">ID #{{ $cert->id }}</span>
+                            </div>
+
+                            <div class="flex flex-col">
+                                <span class="text-gray-400 block text-[11px]">Documento (CPF/CNPJ):</span>
+                                <span class="text-gray-900 dark:text-white font-bold text-sm">{{ $cert->cnpj }}</span>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-1 text-[11px]">
+                                <span class="flex items-center gap-1.5 font-sans font-medium {{ $arquivoExiste ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                    <i class="{{ $arquivoExiste ? 'ri-checkbox-circle-fill' : 'ri-error-warning-fill' }}"></i>
+                                    {{ $arquivoExiste ? 'Arquivo físico no servidor' : 'Arquivo físico ausente' }}
+                                </span>
+
+                                <div class="flex items-center gap-2">
+                                    @if ($arquivoExiste)
+                                        <a href="{{ route('certificados.download', ['banco' => $banco, 'doc' => $cert->cnpj]) }}"
+                                            class="p-1.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 transition"
+                                            title="Baixar Certificado">
+                                            <i class="ri-download-cloud-2-line text-base"></i>
+                                        </a>
+                                    @endif
+
+                                    <button type="button" @click="modalDeletarDoc = '{{ $cert->cnpj }}'"
+                                        class="p-1.5 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-lg hover:bg-red-100 transition"
+                                        title="Excluir Certificado">
+                                        <i class="ri-delete-bin-line text-base"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-full p-8 text-center text-gray-400 font-sans">
+                            <i class="ri-shield-cross-line text-3xl block mb-2"></i>
+                            Nenhum certificado digital cadastrado nesta base.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Enviar Novo -->
+        <div x-show="activeTab === 'enviar'" x-cloak>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4 max-w-2xl mx-auto">
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="ri-upload-cloud-line text-brand-500"></i> Enviar Novo Certificado (.pfx / .p12)
+                </h3>
+
+                <form action="{{ route('certificados.upload', ['banco' => $banco]) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+
+                    <!-- Opção de Tipo de Titular -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-1">
+                            Tipo de Assinatura
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="p-3 border rounded-lg cursor-pointer flex items-center gap-2 text-xs font-medium transition"
+                                :class="tipoTitular === 'entidade' ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 font-bold' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'">
+                                <input type="radio" name="tipo_titular" value="entidade" x-model="tipoTitular" class="text-brand-500">
+                                <span>Titular da Entidade</span>
+                            </label>
+
+                            <label class="p-3 border rounded-lg cursor-pointer flex items-center gap-2 text-xs font-medium transition"
+                                :class="tipoTitular === 'procuracao' ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-bold' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'">
+                                <input type="radio" name="tipo_titular" value="procuracao" x-model="tipoTitular" class="text-purple-500">
+                                <span>Procurador Eletrônico</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Campo de Documento (Exibido apenas na opção Procurador) -->
+                    <div x-show="tipoTitular === 'procuracao'" x-collapse>
+                        <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-1">
+                            CPF ou CNPJ do Procurador
+                        </label>
+                        <input type="text" name="documento" placeholder="Digite o CPF ou CNPJ..."
+                            class="w-full p-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 outline-none font-mono">
+                        <p class="text-[11px] text-gray-400 mt-1">Informe o CPF do contador/responsável ou CNPJ da assessoria que possui a procuração no eSocial.</p>
+                    </div>
+
+                    <div x-show="tipoTitular === 'entidade'" x-collapse>
+                        <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-1">
+                            CNPJ da Entidade (Automático)
+                        </label>
+                        <input type="text" value="{{ $cnpjEntidade }}" disabled
+                            class="w-full p-2 text-sm bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-500 font-mono cursor-not-allowed">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-1">
+                            Arquivo do Certificado (.pfx / .p12)
+                        </label>
+                        <input type="file" name="certificado" accept=".pfx,.p12" required
+                            class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-brand-900/40 dark:file:text-brand-300">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-1">
+                            Senha
+                        </label>
+                        <input type="password" name="senha" placeholder="••••••••"
+                            class="w-full p-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-medium text-sm rounded-lg transition flex items-center justify-center gap-2 shadow-sm">
+                        <i class="ri-save-line text-lg"></i> Salvar e Associar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>0 dark:text-white flex items-center gap-2">
                     <i class="ri-shield-keyhole-line text-brand-500"></i> Gestão de Certificado Digital
                 </h2>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">

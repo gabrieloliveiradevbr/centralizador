@@ -52,43 +52,57 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'Menlo', 'monospace'],
                     },
                     colors: {
                         brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#034d75',
-                            900: '#0c4a6e',
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                            950: '#172554',
                         }
                     }
                 }
             }
         }
     </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         [x-cloak] { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 9999px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased font-sans min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 antialiased font-sans min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
 
     @if (session('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-            class="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 transition">
-            <i class="ri-checkbox-circle-fill text-xl"></i>
-            <span class="text-sm font-medium">{{ session('success') }}</span>
+            class="fixed top-4 right-4 z-50 bg-slate-900/90 dark:bg-slate-100/95 backdrop-blur text-white dark:text-slate-900 px-4 py-2.5 rounded-lg shadow-lg border border-slate-700/30 dark:border-slate-300 flex items-center gap-2.5 transition text-xs font-medium">
+            <i class="ri-checkbox-circle-fill text-emerald-400 dark:text-emerald-600 text-sm"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+            class="fixed top-4 right-4 z-50 bg-rose-600/90 text-white backdrop-blur px-4 py-2.5 rounded-lg shadow-lg border border-rose-500/50 flex items-center gap-2.5 transition text-xs font-medium">
+            <i class="ri-error-warning-fill text-sm"></i>
+            <span>{{ session('error') }}</span>
         </div>
     @endif
 
@@ -98,13 +112,13 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             @include('components.header')
 
-            <main class="flex-1 overflow-y-auto p-6 space-y-6" :class="{ 'p-3 space-y-3': telaCheia }">
+            <main class="flex-1 overflow-y-auto p-5 lg:p-6 space-y-5" :class="{ 'p-3 space-y-3': telaCheia }">
                 @yield('content')
             </main>
         </div>
     </div>
 
-    <!-- INCLUSÃO DAS MODAIS SEPARADAS -->
+    <!-- MODAIS SEPARADAS -->
     @if (!empty($tabela))
         @include('components.modais.editar')
         @include('components.modais.deletar')

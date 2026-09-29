@@ -64,7 +64,7 @@
 
     <!-- Card de Importação -->
     <div class="bg-white dark:bg-gray-800 p-8 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm max-w-2xl mx-auto">
-        <form action="{{ route('xml.import', ['banco' => $banco]) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="{{ route('xml.import', ['banco' => $banco]) }}" method="POST" enctype="multipart/form-data" class="space-y-6" @submit="uploading = true">
             @csrf
 
             <!-- Seleção do Evento -->
@@ -102,7 +102,6 @@
             <div class="pt-4">
                 <button type="submit"
                     :disabled="uploading"
-                    @click="uploading = true"
                     class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
                     <i :class="uploading ? 'ri-loader-4-line animate-spin' : 'ri-upload-cloud-2-line'" class="text-lg"></i>
                     <span x-text="uploading ? 'Importando...' : 'Importar XML para o Banco'"></span>

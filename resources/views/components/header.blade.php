@@ -1,45 +1,42 @@
 <header x-show="!telaCheia"
-    class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 z-10">
+    class="h-14 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between px-5 z-10">
+    
+    <!-- Breadcrumb Minimalista -->
     <div class="flex items-center gap-2 text-xs">
         @if (request()->routeIs('certificados.*'))
-            <div class="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold rounded-md font-mono border border-amber-200/60 dark:border-amber-800/40">
-                <i class="ri-shield-keyhole-line text-amber-500"></i>
-                <span>Gestão de Certificados</span>
-            </div>
-            <span class="text-gray-400">/</span>
-            <span class="text-gray-500 dark:text-gray-400 font-medium">Assinatura Digital</span>
+            <span class="text-slate-400 dark:text-slate-500">Módulos</span>
+            <i class="ri-arrow-right-s-line text-slate-300 dark:text-slate-600 text-xs"></i>
+            <span class="font-medium text-slate-900 dark:text-white">Gestão de Certificados</span>
         @else
-            <div class="flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 dark:bg-gray-900 rounded-md text-gray-500 dark:text-gray-400 font-mono">
-                <i class="ri-database-2-line text-brand-500"></i>
-                <span>{{ $schema ?? 'public' }}</span>
-            </div>
-            <span class="text-gray-400">/</span>
-            <div class="px-2.5 py-1 bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 font-bold rounded-md font-mono">
-                {{ $tabela ?? 'Tabela' }}
-            </div>
+            <span class="text-slate-400 dark:text-slate-500 font-mono">{{ $schema ?? 'public' }}</span>
+            <i class="ri-arrow-right-s-line text-slate-300 dark:text-slate-600 text-xs"></i>
+            <span class="font-medium text-slate-900 dark:text-white font-mono">{{ $tabela ?? 'Tabela' }}</span>
         @endif
     </div>
 
-    <div class="flex items-center gap-3">
-        <!-- Alternar entre Visualizador de Tabelas e Certificados -->
-        <div class="flex items-center gap-3">
-            <a href="{{ request()->routeIs('certificados.*') ? route('visualizar', ['banco' => $banco]) : route('certificados.index', ['banco' => $banco]) }}"
-               class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition {{ request()->routeIs('certificados.*') ? 'bg-brand-50 border-brand-200 text-brand-700 dark:bg-brand-950/40 dark:border-brand-800 dark:text-brand-300 hover:bg-brand-100' : 'bg-amber-50/70 border-amber-200/80 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800/50 dark:text-amber-300 hover:bg-amber-100/80' }}">
-                <i class="{{ request()->routeIs('certificados.*') ? 'ri-table-line text-brand-500' : 'ri-shield-keyhole-line text-amber-500' }} text-sm"></i>
-                <span>{{ request()->routeIs('certificados.*') ? 'Ver Tabelas' : 'Certificado Digital' }}</span>
-            </a>
+    <!-- Ações e Navegação -->
+    <div class="flex items-center gap-2.5">
+        <!-- Navegação entre Tabelas / Certificados -->
+        <a href="{{ request()->routeIs('certificados.*') ? route('visualizar', ['banco' => $banco]) : route('certificados.index', ['banco' => $banco]) }}"
+           class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+            <i class="{{ request()->routeIs('certificados.*') ? 'ri-table-line' : 'ri-shield-keyhole-line' }} text-slate-400"></i>
+            <span>{{ request()->routeIs('certificados.*') ? 'Visualizar Tabelas' : 'Certificados' }}</span>
+        </a>
 
-            <a href="{{ route('xml.import.view', ['banco' => $banco]) }}"
-               class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-brand-600 bg-brand-500 hover:bg-brand-600 text-white transition shadow-sm">
-                <i class="ri-upload-cloud-2-line text-sm"></i>
-                <span>Importar XML</span>
-            </a>
-        </div>
+        <!-- Botão Importar XML -->
+        <a href="{{ route('xml.import.view', ['banco' => $banco]) }}"
+           class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 transition shadow-sm">
+            <i class="ri-upload-cloud-2-line text-xs"></i>
+            <span>Importar XML</span>
+        </a>
 
-        <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1">
-            <i class="ri-server-line text-gray-400 text-xs"></i>
+        <div class="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1"></div>
+
+        <!-- Seletor de Banco/Conexão -->
+        <div class="relative flex items-center bg-slate-100/70 dark:bg-slate-800/80 rounded-lg px-2.5 py-1 text-xs">
+            <i class="ri-server-line text-slate-400 mr-2 text-xs"></i>
             <select onchange="location = this.value;"
-                class="bg-transparent text-gray-800 dark:text-gray-200 text-xs focus:outline-none cursor-pointer">
+                class="bg-transparent text-slate-700 dark:text-slate-300 text-xs focus:outline-none cursor-pointer pr-1 font-medium">
                 @foreach ($bancosDisponiveis as $key => $nome)
                     <option value="{{ request()->routeIs('certificados.*') ? route('certificados.index', ['banco' => $key]) : route('visualizar', ['banco' => $key]) }}"
                         {{ $banco === $key ? 'selected' : '' }}>
@@ -49,10 +46,11 @@
             </select>
         </div>
 
+        <!-- Alternar Tema -->
         <button @click="toggleDarkMode()"
-            class="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+            class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
             title="Alternar Tema">
-            <i :class="darkMode ? 'ri-sun-line text-amber-400' : 'ri-moon-line text-gray-600'" class="text-lg"></i>
+            <i :class="darkMode ? 'ri-sun-line text-amber-400' : 'ri-moon-line'" class="text-base"></i>
         </button>
     </div>
 </header>

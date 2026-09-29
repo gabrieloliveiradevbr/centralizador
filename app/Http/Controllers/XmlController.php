@@ -58,6 +58,7 @@ class XmlController extends Controller
    */
   public function import(Request $request, string $banco)
   {
+    Log::info("DEBUG: Request atingiu o método import", ['banco' => $banco]);
     Log::info("Iniciando importação de XML", ['banco' => $banco, 'tabela' => $request->input('tabela')]);
 
     $bancosDisponiveis = $this->getBancosDisponiveis();
